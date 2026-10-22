@@ -10,7 +10,7 @@
 class ownewsletterInfo
 {
     // The release version; also sent in the version header of every newsletter mail
-    const SOFTWARE_VERSION = '0.1.0';
+    const SOFTWARE_VERSION = '0.1.1';
 
     static function info()
     {

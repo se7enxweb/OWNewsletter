@@ -263,8 +263,11 @@ the extension documents every value. The main ones:
 RootFolderNodeId=1
 # PHP binary used to render editions (bin/php/createoutput.php)
 PhpCli=php
+# Login or user id the editions are rendered as; empty = editions are not rendered
+OutputUser=
 AvailableSkinList[]=default
-# Lifetime of a pending subscription, in seconds; a product of numbers is allowed
+# Lifetime of a pending subscription, in seconds: a whole number or a product
+# of whole numbers such as 6*24*60*60
 ConfirmationTimeOut=6*24*60*60
 NewsletterEditionContentClassGroup=Newsletter Editions
 # enabled: the queue only takes addresses of the domains below
@@ -307,6 +310,23 @@ AdditionalFields[]
 Note that `TransportMethodCronjob=file` is the shipped default: queued
 newsletters are written to `FileTransportMailDir` and not sent until you set
 `smtp` or `sendmail`.
+
+### The user that renders editions
+
+Editions are rendered by `bin/php/createoutput.php`, which signs in as the user
+named by `OutputUser` so that the templates can read the edition's drafts and
+every node and image it includes. There is no default: with `OutputUser`
+empty, or naming no existing, enabled user, the script stops with an error and
+no edition is previewed or queued. Give it a login or a user id, ideally a
+dedicated user whose role can read the newsletter content and nothing more:
+
+```ini
+# settings/override/newsletter.ini.append.php
+[NewsletterSettings]
+OutputUser=newsletter-renderer
+# or by user (content object) id
+#OutputUser=1234
+```
 
 ### Extra subscription form fields
 
@@ -411,16 +431,19 @@ A crontab example:
 
 ## Upgrading
 
-This is the first release under the se7enxweb name. From an older checkout of
-the Open Wide repository: replace the extension directory, regenerate the
-autoloads and clear the caches. The database schema and the settings are
-unchanged.
+From 0.1.0: set `[NewsletterSettings] OutputUser` (see "The user that renders
+editions"); until it is set, editions are not rendered. To keep the old
+behaviour, name the user that 0.1.0 used, but a dedicated user with read access
+is better. `ConfirmationTimeOut` keeps working when it is a number or a product
+such as `6*24*60*60`; any other expression is refused and the cleanup cron job
+then removes nothing.
+
+From an older checkout of the Open Wide repository: replace the extension
+directory, regenerate the autoloads and clear the caches. The database schema
+is unchanged.
 
 ## Known limits
 
-- Editions are rendered by `bin/php/createoutput.php`, which logs in as the user
-  named `admin`; that user must exist and be enabled.
-- `ConfirmationTimeOut` is evaluated as PHP; keep it to numbers and `*`.
 - The classes are only shipped as OWMigration migrations; there is no content
   package.
 
