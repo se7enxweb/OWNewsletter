@@ -488,20 +488,33 @@ class OWNewsletterSending extends eZPersistentObject {
         $currentHostName = eZSys::hostname();
         $wwwDir = eZSys::wwwDir();
 
-        $wwwDirString = '';
+        // Every argument is quoted on its own: the host name comes from the request
+        $scriptPath = str_replace( '/', eZSys::fileSeparator(), 'extension/ownewsletter/bin/php/createoutput.php' );
+        $arguments = array(
+            $scriptPath,
+            '--object_id=' . (int) $editionContentObjectId,
+            '--object_version=' . (int) $versionId
+        );
         if( $wwwDir != '' ) {
-            $wwwDirString = "--www_dir=$wwwDir ";
+            $arguments[] = '--www_dir=' . $wwwDir;
         }
+        $arguments[] = '--current_hostname=' . $currentHostName;
+        $arguments[] = '--skin_name=' . $skinName;
+        $arguments[] = '-s';
+        $arguments[] = (string) $siteAccess;
 
-        $cmd = "\"$phpCli\" extension/ownewsletter/bin/php/createoutput.php --object_id=$editionContentObjectId --object_version=$versionId $wwwDirString--current_hostname=$currentHostName --skin_name=$skinName -s $siteAccess";
-
-        $fileSep = eZSys::fileSeparator();
-        $cmd = str_replace( '/', $fileSep, $cmd );
+        $cmd = escapeshellarg( (string) $phpCli );
+        foreach( $arguments as $argument ) {
+            $cmd .= ' ' . escapeshellarg( $argument );
+        }
 
         eZDebug::writeDebug( "shell_exec( $cmd )", 'newsletter/preview' );
 
-        $returnValue = shell_exec( escapeshellcmd( $cmd ) );
-        $newsletterContentArray = unserialize( trim( $returnValue ) );
+        $returnValue = shell_exec( $cmd );
+        $newsletterContentArray = is_string( $returnValue ) ? @unserialize( trim( $returnValue ), array( 'allowed_classes' => false ) ) : false;
+        if( !is_array( $newsletterContentArray ) ) {
+            throw new OWNewsletterException( 'The edition could not be rendered; check [NewsletterSettings] OutputUser and PhpCli in newsletter.ini' );
+        }
 
         if( $newsletterContentArray['html_mail_image_include'] === 1 ) {
             $newsletterContentArray = self::prepareImageInclude( $newsletterContentArray );
