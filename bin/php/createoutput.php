@@ -25,14 +25,30 @@ $options = $script->getOptions( "[object_id:][object_version:][current_hostname:
 
 $script->initialize();
 
-// login as admin
-// that template proecessing inlcude all images
-$user = eZUser::fetchByName( 'admin' );
+// The edition is rendered as the user named by [NewsletterSettings] OutputUser
+// (a login or a user id), so that the templates may read the edition's draft
+// versions and every node and image it includes. No account is assumed: when
+// the setting is empty or names no enabled user, the script refuses to run.
+$newsletterIni = eZINI::instance( 'newsletter.ini' );
+$outputUserSetting = $newsletterIni->hasVariable( 'NewsletterSettings', 'OutputUser' ) ? trim( (string) $newsletterIni->variable( 'NewsletterSettings', 'OutputUser' ) ) : '';
 
-if( $user and $user->isEnabled() ) {
-    $userID = $user->attribute( 'contentobject_id' );
-    eZUser::setCurrentlyLoggedInUser( $user, $userID );
+if( $outputUserSetting === '' ) {
+    $cli->error( 'OWNewsletter: [NewsletterSettings] OutputUser in newsletter.ini is empty. Set it to the login or user id of the user that renders newsletter editions; the script does not run without it.' );
+    $script->shutdown( 1 );
 }
+
+if( ctype_digit( $outputUserSetting ) ) {
+    $user = eZUser::fetch( (int) $outputUserSetting );
+} else {
+    $user = eZUser::fetchByName( $outputUserSetting );
+}
+
+if( !$user instanceof eZUser || !$user->isEnabled() ) {
+    $cli->error( 'OWNewsletter: [NewsletterSettings] OutputUser in newsletter.ini names no existing, enabled user; the script does not run.' );
+    $script->shutdown( 1 );
+}
+
+eZUser::setCurrentlyLoggedInUser( $user, $user->attribute( 'contentobject_id' ) );
 
 $objectId = 0;
 $objectVersion = 0;
@@ -69,7 +85,8 @@ $tpl = eZTemplate::factory();
 $tpl->setVariable( 'contentobject', $contentObject );
 
 if( !is_object( $contentObject ) ) {
-    $script->shutdown();
+    $cli->error( "OWNewsletter: object $objectId has no version $objectVersion." );
+    $script->shutdown( 1 );
 }
 
 $contentType = 'text/html';
