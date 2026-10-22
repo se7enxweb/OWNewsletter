@@ -1,0 +1,35 @@
+{
+    "name": "se7enxweb/ownewsletter",
+    "description": "Exponential extension for newsletters: mailing lists, subscription with email confirmation, editions as content, skins, queued sending by cron, personalization, click and read tracking, bounce handling, blacklist and CSV import and export.",
+    "type": "ezpublish-legacy-extension",
+    "keywords": [ "Exponential", "extension", "newsletter", "mailing list", "email", "subscription", "bounce", "tracking" ],
+    "homepage": "https://github.com/se7enxweb/OWNewsletter",
+    "license": "GPL-2.0-only",
+    "authors": [
+        {
+            "name": "Open Wide",
+            "homepage": "http://www.openwide.fr",
+            "role": "Original Author"
+        },
+        {
+            "name": "7x",
+            "homepage": "https://se7enx.com",
+            "email": "info@se7enx.com",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/se7enxweb/OWNewsletter/issues",
+        "source": "https://github.com/se7enxweb/OWNewsletter"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.0",
+        "se7enxweb/exponential-legacy-installer": "^2.2"
+    },
+    "extra": {
+        "ezpublish-legacy-extension-name": "ownewsletter",
+        "installer-name": "ownewsletter"
+    }
+}

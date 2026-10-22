@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<software>
+    <metadata>
+        <name>OWNewsletter - Multi Channel Marketing</name>
+        <version>0.1.0</version>
+        <copyright>Copyright (C) 2013 - 2015 Open Wide; Copyright (C) 1998 - 2026 7x and the Exponential Foundation</copyright>
+        <license>GNU General Public License v2.0</license>
+        <info_url>https://github.com/se7enxweb/OWNewsletter</info_url>
+    </metadata>
+
+    <dependencies>
+        <requires>
+            <extension name="ezjscore" />
+        </requires>
+    </dependencies>
+
+</software>
